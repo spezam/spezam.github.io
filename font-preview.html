@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Font Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Coral+Pixels&display=swap" rel="stylesheet">
+
+  <style>
+    @font-face {
+      font-family: 'GeistPixelSquare';
+      src: url('https://raw.githubusercontent.com/vercel/geist-font/main/fonts/GeistPixel/ttf/GeistPixel-Square.ttf');
+    }
+    @font-face {
+      font-family: 'GeistPixelGrid';
+      src: url('https://raw.githubusercontent.com/vercel/geist-font/main/fonts/GeistPixel/ttf/GeistPixel-Grid.ttf');
+    }
+    @font-face {
+      font-family: 'GeistPixelCircle';
+      src: url('https://raw.githubusercontent.com/vercel/geist-font/main/fonts/GeistPixel/ttf/GeistPixel-Circle.ttf');
+    }
+    @font-face {
+      font-family: 'GeistPixelTriangle';
+      src: url('https://raw.githubusercontent.com/vercel/geist-font/main/fonts/GeistPixel/ttf/GeistPixel-Triangle.ttf');
+    }
+    @font-face {
+      font-family: 'GeistPixelLine';
+      src: url('https://raw.githubusercontent.com/vercel/geist-font/main/fonts/GeistPixel/ttf/GeistPixel-Line.ttf');
+    }
+    @font-face {
+      font-family: 'TwoSlice';
+      src: url('https://joefatula.com/assets/Two%20Slice.ttf');
+    }
+
+    * { margin: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a1a2e;
+      color: #ccc;
+      padding: 40px 20px;
+      font-family: monospace;
+    }
+
+    h2 {
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+      font-family: monospace;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #0d0d1a;
+      border: 1px solid #222;
+      border-radius: 4px;
+      padding: 30px;
+      position: relative;
+    }
+
+    .card .label {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-size: 9px;
+      color: #444;
+      font-family: monospace;
+      letter-spacing: 1px;
+    }
+
+    .card .logo {
+      font-size: 32px;
+      color: #8487af;
+      margin-bottom: 20px;
+    }
+
+    .card h1 {
+      font-size: 28px;
+      font-weight: normal;
+      margin-bottom: 12px;
+    }
+
+    .card a {
+      color: #8487af;
+      text-decoration: none;
+      font-size: 24px;
+    }
+
+    .card a:hover {
+      color: #fff;
+      background: #8487af;
+    }
+
+    .coral    { font-family: 'Coral Pixels', monospace; }
+    .gp-sq    { font-family: 'GeistPixelSquare', monospace; }
+    .gp-gr    { font-family: 'GeistPixelGrid', monospace; }
+    .gp-ci    { font-family: 'GeistPixelCircle', monospace; }
+    .gp-tr    { font-family: 'GeistPixelTriangle', monospace; }
+    .gp-li    { font-family: 'GeistPixelLine', monospace; }
+    .twoslice { font-family: 'TwoSlice', monospace; font-size: 80px; }
+  </style>
+</head>
+<body>
+  <h2>Pixel font preview &mdash; spezam.github.io</h2>
+  <div class="grid">
+
+    <div class="card coral">
+      <span class="label">Coral Pixels &mdash; Google Fonts</span>
+      <div class="logo">:wq</div>
+      <h1>Matteo Ridolfi</h1>
+      <a href="#">Email</a> | <a href="#">GitHub</a>
+    </div>
+
+    <div class="card gp-sq">
+      <span class="label">Geist Pixel Square &mdash; Vercel</span>
+      <div class="logo">:wq</div>
+      <h1>Matteo Ridolfi</h1>
+      <a href="#">Email</a> | <a href="#">GitHub</a>
+    </div>
+
+    <div class="card gp-gr">
+      <span class="label">Geist Pixel Grid &mdash; Vercel</span>
+      <div class="logo">:wq</div>
+      <h1>Matteo Ridolfi</h1>
+      <a href="#">Email</a> | <a href="#">GitHub</a>
+    </div>
+
+    <div class="card gp-ci">
+      <span class="label">Geist Pixel Circle &mdash; Vercel</span>
+      <div class="logo">:wq</div>
+      <h1>Matteo Ridolfi</h1>
+      <a href="#">Email</a> | <a href="#">GitHub</a>
+    </div>
+
+    <div class="card gp-tr">
+      <span class="label">Geist Pixel Triangle &mdash; Vercel</span>
+      <div class="logo">:wq</div>
+      <h1>Matteo Ridolfi</h1>
+      <a href="#">Email</a> | <a href="#">GitHub</a>
+    </div>
+
+    <div class="card gp-li">
+      <span class="label">Geist Pixel Line &mdash; Vercel</span>
+      <div class="logo">:wq</div>
+      <h1>Matteo Ridolfi</h1>
+      <a href="#">Email</a> | <a href="#">GitHub</a>
+    </div>
+
+    <div class="card twoslice">
+      <span class="label" style="font-family:monospace">Two Slice &mdash; Joe Fatula</span>
+      <div class="logo">:wq</div>
+      <h1>Matteo Ridolfi</h1>
+      <a href="#">Email</a> | <a href="#">GitHub</a>
+    </div>
+
+  </div>
+
+  <p style="margin-top:30px;font-size:10px;color:#333;">
+    Analog Mono (Andrew Gleeson) is paid — not included. Two Slice may take a moment to load from joefatula.com.
+  </p>
+</body>
+</html>

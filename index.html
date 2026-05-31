@@ -1,29 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Matteo Ridolfi</title>
 
     <style>
+@font-face {
+  font-family: 'GeistPixelLine';
+  src: url('GeistPixel-Line.ttf') format('truetype');
+  font-display: swap;
+}
+
 * {
   margin: 0;
   box-sizing: border-box;
 }
 
+body {
+  font: 15px 'GeistPixelLine', monospace;
+  background: #111;
+  color: #ccc;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 999;
+}
+
 .logo {
-  padding-bottom: 50px;
-  padding-top: 20px;
-  padding-left: 50px;
+  padding: 20px 0 50px 50px;
   text-align: left;
 }
 
 .home {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: -webkit-flex;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -31,23 +53,20 @@
 }
 
 .main {
-  -webkit-flex: none;
-  -moz-flex: none;
   flex: none;
   text-align: center;
 }
 
 h1 {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: normal;
 }
 
-body {
-  font: 13px Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+.links {
+  margin-top: 12px;
 }
 
 a {
-  //color: #22BAD9;
   color: #8487af;
   -webkit-tap-highlight-color: rgba(0,0,0,0);
   text-decoration: none;
@@ -55,9 +74,7 @@ a {
 
 a:hover {
   color: #fff;
-  //background: #22BAD9;
   background: #8487af;
-  text-decoration: none;
 }
 
     </style>
@@ -73,10 +90,11 @@ a:hover {
     <div class="home">
       <div class="main">
 	<h1>Matteo Ridolfi</h1>
-	<br/>
-	<a target="_blank" href="mailto:spezam@gmail.com">Email</a>
-	|
-	<a target="_blank" href="https://github.com/spezam">GitHub</a>
+	<div class="links">
+	  <a target="_blank" href="mailto:spezam+gh@spezam.com">Email</a>
+	  |
+	  <a target="_blank" href="https://github.com/spezam">GitHub</a>
+	</div>
       </div>
     </div>
   </body>
