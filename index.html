@@ -1,15 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Matteo Ridolfi</title>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matteo Ridolfi</title>
 
-    <style>
+  <style>
 @font-face {
   font-family: 'GeistPixelLine';
   src: url('GeistPixel-Line.ttf') format('truetype');
   font-display: swap;
+}
+
+:root {
+  --bg: #111;
+  --ink: #ccc;    /* text, grid dots, dithered halos, base64, frame */
+  --link: #8487af;
+  --gap: 22px;
+  --gutter: 40px; /* left margin, holds the base64 strip */
+
+  /* 1px dots on an 8px pitch, --ink colour at half opacity (fill must match --ink) */
+  --grid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect x='3' y='3' width='1' height='1' fill='%23ccc' fill-opacity='.5'/%3E%3C/svg%3E");
 }
 
 * {
@@ -19,8 +30,10 @@
 
 body {
   font: 15px 'GeistPixelLine', monospace;
-  background: #111;
-  color: #ccc;
+  background: var(--bg);
+  color: var(--ink);
+  height: 100vh;
+  overflow: hidden;
 }
 
 body::after {
@@ -38,23 +51,62 @@ body::after {
   z-index: 999;
 }
 
-.logo {
-  padding: 20px 0 50px 50px;
-  text-align: left;
+/* the "desktop": dot grid over the page background, dithered blobs painted on top */
+.desk {
+  position: fixed;
+  inset: var(--gap) var(--gap) var(--gap) var(--gutter);
+  border: 1px solid var(--ink);
+  background: var(--grid) var(--bg);
+  overflow: hidden;
 }
 
+#dither {
+  position: absolute;
+  left: 0;
+  top: 0;
+  image-rendering: pixelated;
+}
+
+.tag {
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 3px 8px;
+}
+
+/* vertical nested-base64 strip, reads bottom to top */
+.b64 {
+  position: fixed;
+  left: 0;
+  top: var(--gap);
+  bottom: var(--gap);
+  width: var(--gutter);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font: 10px/var(--gutter) ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* centre content: same layout and type as index.html */
 .home {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: -1;
 }
 
 .main {
   flex: none;
   text-align: center;
+  /* clears the dot grid behind the thin pixel font so it stays readable */
+  background: var(--bg);
+  padding: 14px 20px;
 }
 
 h1 {
@@ -67,35 +119,180 @@ h1 {
 }
 
 a {
-  color: #8487af;
+  color: var(--link);
   -webkit-tap-highlight-color: rgba(0,0,0,0);
   text-decoration: none;
 }
 
 a:hover {
   color: #fff;
-  background: #8487af;
+  background: var(--link);
 }
 
-    </style>
-  </head>
+@media (max-width: 600px) {
+  :root { --gap: 10px; --gutter: 28px; }
+}
+  </style>
+</head>
 
-  <body>
-    <div class="main">
-      <div class="logo">
-	:wq
-      </div>
-    </div>
+<body>
+  <div class="b64" id="b64" aria-hidden="true"></div>
+
+  <main class="desk">
+    <canvas id="dither" aria-hidden="true"></canvas>
+
+    <div class="tag">:wq</div>
 
     <div class="home">
       <div class="main">
-	<h1>Matteo Ridolfi</h1>
-	<div class="links">
-	  <a target="_blank" href="mailto:spezam+gh@spezam.com">Email</a>
-	  |
-	  <a target="_blank" href="https://github.com/spezam">GitHub</a>
-	</div>
+        <h1>Matteo Ridolfi</h1>
+        <div class="links">
+          <a target="_blank" href="mailto:spezam+gh@spezam.com">Email</a>
+          |
+          <a target="_blank" href="https://github.com/spezam">GitHub</a>
+        </div>
       </div>
     </div>
-  </body>
+  </main>
+
+  <script>
+(() => {
+  /* Blobs: centre as a fraction of the desk, radius in units of sqrt(w*h),
+     sx/sy stretch, peak = max ink coverage (0.5 would be a full checkerboard; kept
+     lower so the light-on-dark cores stay mid-tone). Low peaks are the faint clouds
+     of stray dots. */
+  const BLOBS = [
+    { cx: .135, cy: .73, r: .19, sx: 1,   sy: 1,    peak: .38 },
+    { cx: .050, cy: .87, r: .15, sx: 1,   sy: 1,    peak: .42 },
+    { cx: .887, cy: .49, r: .19, sx: 1,   sy: 1.05, peak: .40 },
+    { cx: .466, cy: .97, r: .21, sx: 1.5, sy: 1,    peak: .42 },
+    { cx: .080, cy: .34, r: .16, sx: 1,   sy: 1,    peak: .035, haze: true },
+    { cx: .930, cy: .14, r: .10, sx: 1,   sy: 1,    peak: .05,  haze: true },
+  ];
+
+  const desk = document.querySelector('.desk');
+  const canvas = document.getElementById('dither');
+  const ctx = canvas.getContext('2d');
+
+  // seeded PRNG, so the pattern is stable across reloads
+  function rng(seed) {
+    return () => {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function makeNoise(seed) {
+    const r = rng(seed), v = new Float32Array(256 * 256);
+    for (let i = 0; i < v.length; i++) v[i] = r();
+    const at = (x, y) => v[((y & 255) << 8) | (x & 255)];
+    return (x, y) => {
+      const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+      const u = xf * xf * (3 - 2 * xf), w = yf * yf * (3 - 2 * yf);
+      const a = at(xi, yi), b = at(xi + 1, yi), c = at(xi, yi + 1), d = at(xi + 1, yi + 1);
+      return a + (b - a) * u + (c - a) * w + (a - b - c + d) * u * w;
+    };
+  }
+
+  const fbm = (n, x, y) =>
+    n(x, y) * .5 + n(x * 2.03 + 17, y * 2.03 + 31) * .3 + n(x * 4.1 + 5, y * 4.1 + 9) * .2;
+
+  const smooth = (a, b, x) => {
+    const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  };
+
+  // target ink coverage per cell: soft domes, warped edges, clumped stray-dot halos
+  function buildField(w, h) {
+    const f = new Float32Array(w * h);
+    const s = Math.sqrt(w * h);
+    const nWarp = makeNoise(11), nClump = makeNoise(29);
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const ux = x / s, uy = y / s;
+        const px = ux + (fbm(nWarp, ux * 3.2, uy * 3.2) - .5) * .12;
+        const py = uy + (fbm(nWarp, ux * 3.2 + 40, uy * 3.2 + 40) - .5) * .12;
+        let clump = -1, d = 0;
+
+        for (const b of BLOBS) {
+          const dx = (px - b.cx * w / s) / (b.r * b.sx);
+          const dy = (py - b.cy * h / s) / (b.r * b.sy);
+          const t = Math.sqrt(dx * dx + dy * dy);
+          if (t >= 2) continue;
+          if (clump < 0) clump = smooth(.4, .7, fbm(nClump, ux * 9, uy * 9));
+
+          if (t < 1) {
+            const dome = b.peak * (1 - t * t * t);
+            d += b.haze ? dome * (.2 + 1.6 * clump) : dome;
+          }
+          if (t >= 1 && !b.haze) {
+            d += .035 * Math.min(1, b.peak / .4) * Math.exp(-(t - 1) * 3.5) * clump;
+          }
+        }
+        f[y * w + x] = Math.min(d, .45);
+      }
+    }
+    return f;
+  }
+
+  // Floyd-Steinberg, serpentine. Threshold jitter in sparse areas keeps stray dots from forming a lattice.
+  function dither(f, w, h) {
+    const rnd = rng(7), out = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++) {
+      const dx = (y & 1) ? -1 : 1;
+      const x0 = dx > 0 ? 0 : w - 1, x1 = dx > 0 ? w : -1;
+      for (let x = x0; x !== x1; x += dx) {
+        const i = y * w + x, v = f[i];
+        const on = v >= .5 + (v < .12 ? (rnd() - .5) * .5 : 0) ? 1 : 0;
+        out[i] = on;
+        const e = v - on, nx = x + dx, bx = x - dx;
+        if (nx >= 0 && nx < w) f[i + dx] += e * 7 / 16;
+        if (y + 1 < h) {
+          if (bx >= 0 && bx < w) f[i + w - dx] += e * 3 / 16;
+          f[i + w] += e * 5 / 16;
+          if (nx >= 0 && nx < w) f[i + w + dx] += e * 1 / 16;
+        }
+      }
+    }
+    return out;
+  }
+
+  function paint() {
+    // ~2.5 css px per cell, snapped to whole device pixels so cells stay crisp (half the 5px grid pitch)
+    const dpr = window.devicePixelRatio || 1;
+    const CELL = Math.max(2, Math.round(2.5 * dpr)) / dpr;
+    const w = Math.ceil(desk.clientWidth / CELL), h = Math.ceil(desk.clientHeight / CELL);
+    canvas.width = w; canvas.height = h;
+    canvas.style.width = w * CELL + 'px';
+    canvas.style.height = h * CELL + 'px';
+
+    const on = dither(buildField(w, h), w, h);
+    const img = ctx.createImageData(w, h), px = img.data;
+    for (let i = 0; i < on.length; i++) {
+      if (on[i]) px[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+
+    // colour the cells from the CSS --ink variable, so the palette lives in one place
+    ctx.globalCompositeOperation = 'source-in';
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  let timer;
+  addEventListener('resize', () => { clearTimeout(timer); timer = setTimeout(paint, 120); });
+  paint();
+
+  // "Vm0w..." strip: a short string base64-encoded repeatedly (7+ rounds), enough to fill the height
+  let s = 'Matteo Ridolfi', rounds = 0;
+  const capacity = Math.ceil(innerHeight / 6);
+  do { s = btoa(s); rounds++; } while (rounds < 7 || s.length < capacity);
+  document.getElementById('b64').textContent = s;
+})();
+  </script>
+</body>
 </html>
