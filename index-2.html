@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#efb5c4">
+  <meta name="description" content="Sbaglia in fretta. Prova tutto. Non ti fermare mai.">
+  <title>Non ti fermare mai — Matteo Ridolfi</title>
+  <style>
+    @font-face {
+      font-family: 'GeistPixelLine';
+      src: url('GeistPixel-Line.ttf') format('truetype');
+      font-display: swap;
+    }
+    :root { --paper: #efb5c4; --ink: #3c3435; --gap: 22px; --gutter: 40px; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); overflow-x: clip; }
+    ::selection { background: var(--ink); color: var(--paper); }
+    .b64 {
+      position: fixed; left: 0; top: var(--gap); bottom: var(--gap); width: var(--gutter);
+      writing-mode: vertical-rl; transform: rotate(180deg);
+      font: 10px/var(--gutter) ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      letter-spacing: .08em; white-space: nowrap; overflow: hidden; user-select: none;
+    }
+    .tag {
+      position: absolute; top: 0; left: 0; padding: 3px 8px;
+      background: var(--ink); color: var(--paper); font: 15px 'GeistPixelLine', monospace;
+    }
+    .poster {
+      min-height: calc(100svh - 2 * var(--gap));
+      margin: var(--gap) var(--gap) var(--gap) var(--gutter);
+      border: 1px solid var(--ink); position: relative; isolation: isolate;
+      padding: 32px clamp(24px, 4.7vw, 90px);
+      display: flex; flex-direction: column;
+    }
+    .texture { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; isolation: isolate; }
+    .paper, .halftone { position: absolute; inset: 0; pointer-events: none; z-index: -1; }
+    .paper { width: 100%; height: 100%; opacity: .16; mix-blend-mode: multiply; }
+    .halftone {
+      background-image: radial-gradient(circle, var(--ink) 1.5px, transparent 2px);
+      background-size: 7px 7px; opacity: .23; transform: rotate(-18deg) scale(1.3);
+      mask-image: radial-gradient(ellipse 35% 36% at 91% 11%, #000 5%, transparent 85%),
+                  radial-gradient(ellipse 29% 34% at 5% 90%, #000 5%, transparent 85%);
+    }
+    .composition {
+      flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center; gap: 2vw; width: 100%; max-width: 1700px;
+      margin: 0 auto; padding: clamp(24px, 5vh, 64px) 0;
+    }
+    .motto { margin: 0; font-weight: normal; position: relative; z-index: 1; }
+    .motto-line {
+      display: block; font-family: 'GeistPixelLine', monospace;
+      font-size: clamp(22px, min(3.5vw, 8svh), 64px); line-height: .95;
+      font-weight: normal; font-style: normal; letter-spacing: -.06em;
+    }
+    .motto-line:nth-child(2) { margin-top: -.22em; }
+    .motto-line:nth-child(3) { margin-top: .08em; }
+    .motto-line:nth-child(4) { margin-top: -.02em; }
+    .motto-line:nth-child(5) { margin-top: .05em; }
+    .identity {
+      text-align: center; font: 15px 'GeistPixelLine', monospace;
+      padding: 14px 20px; background: var(--paper);
+    }
+    .identity p { margin: 0; font-size: 16px; }
+    .identity .links { margin-top: 12px; white-space: nowrap; }
+    .identity a { color: #685266; text-decoration: none; }
+    .identity a:hover { color: var(--paper); background: #685266; }
+    .identity a:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+    .illustration {
+      position: absolute; top: calc(50% + 120px); right: calc(-3vw - 8px);
+      transform: translateY(-50%); margin: 0; width: min(29vw, 580px);
+    }
+    .illustration::before {
+      content: ''; position: absolute; top: 30%; bottom: 26%;
+      right: calc(3vw + 7px); width: 3px; background: var(--paper);
+    }
+    .eye {
+      position: relative; display: block; width: 100%; height: auto; object-fit: contain;
+      mask-image: repeating-linear-gradient(to bottom, #000 0 2px, transparent 2px 3px);
+      max-height: calc(100svh - 2 * var(--gap) - 66px - clamp(48px, 10vh, 128px));
+    }
+    @media (min-width: 1700px) { .composition { gap: 80px; } }
+    @media (max-width: 760px) {
+      :root { --gap: 10px; --gutter: 28px; }
+      .poster { padding: 22px 24px; }
+      .composition { grid-template-columns: 1fr; align-content: center; gap: 38px; padding: 38px 0 52px; }
+      .illustration { position: relative; top: auto; right: auto; transform: none; grid-row: 1; width: min(56%, 264px); margin: 0 auto; }
+      .illustration::before { display: none; }
+      .identity { grid-row: 2; justify-self: center; }
+      .eye { max-height: none; }
+      .motto { width: max-content; max-width: 100%; margin: 0 auto; }
+      .motto-line { font-size: clamp(22px, 6.8vw, 48px); }
+    }
+    @media print {
+      .poster { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="b64" id="b64" aria-hidden="true"></div>
+  <main class="poster">
+    <div class="tag" aria-hidden="true">:wq</div>
+    <div class="texture" aria-hidden="true">
+    <svg class="paper" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+      <rect width="100%" height="100%" filter="url(#grain)" opacity=".65"/>
+    </svg>
+    <div class="halftone" aria-hidden="true"></div>
+    </div>
+
+    <div class="composition">
+      <h1 class="motto" aria-label="Sbaglia in fretta. Prova tutto. Non ti fermare mai.">
+        <span class="motto-line" aria-hidden="true">SBAGLIA in</span>
+        <span class="motto-line" aria-hidden="true">fretta. PROVA</span>
+        <span class="motto-line" aria-hidden="true">tutto. NON</span>
+        <span class="motto-line" aria-hidden="true">TI FERMARE</span>
+        <span class="motto-line" aria-hidden="true">mai.</span>
+      </h1>
+
+      <div class="identity">
+        <p>Matteo Ridolfi</p>
+        <div class="links">
+          <a href="mailto:spezam+gh@spezam.com">Email</a>
+          <span aria-hidden="true"> | </span>
+          <a href="https://github.com/spezam">GitHub</a>
+        </div>
+      </div>
+
+      <figure class="illustration">
+        <img class="eye" src="assets/smiley-transparent.png" alt="" aria-hidden="true">
+      </figure>
+    </div>
+  </main>
+  <script>
+    (() => {
+      let encoded = 'Sbaglia in fretta. Prova tutto. Non ti fermare mai.';
+      for (let round = 0; round < 7; round++) encoded = btoa(encoded);
+      document.getElementById('b64').textContent = encoded;
+    })();
+  </script>
+</body>
+</html>
